@@ -2,12 +2,15 @@ package com.example.shivamkumar.chess;
 
 import android.content.Context;
 import android.support.v7.widget.AppCompatButton;
+import android.util.Log;
+import android.widget.Toast;
 
 public class ChessButton extends AppCompatButton{
 
     private int piece=0;
     public  int x,y;
     public boolean isShowing = false;
+    public boolean checkFlag=false;
     public int getPiece() {
         return piece;
     }
@@ -21,8 +24,8 @@ public class ChessButton extends AppCompatButton{
                 setBackgroundColor(getResources().getColor(R.color.white,null));
             }
         }else if((x+y)%2==0) {
-            MainActivity.toggleTurnMove();
             if (piece == 6) {
+               // setBackgroundDrawable(getResources().getDrawable(R.drawable.wbp,null));
                 setwwp();
             } else if (piece == 12) {
                 setbwp();
@@ -88,89 +91,120 @@ public class ChessButton extends AppCompatButton{
     }
     //black pieces
     public void setbbr(){
-        setText("br");
+       // setText("br");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bbr,null));
         piece=9;
     }
     public void setbwr(){
-        setText("br");piece=9;
+       // setText("br");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bwr,null));
+        piece=9;
     }
     public void setbbb(){
-        setText("bb");piece=10;
+        //setText("bb");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bbb,null));
+        piece=10;
     }
     public void setbbk(){
-        setText("bk");piece=11;
+        //setText("bk");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bbk,null));
+        piece=11;
     }
     public void setbwk(){
-        setText("bk");piece=11;
+        //setText("bk");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bwk,null));
+        piece=11;
     }
     public void setbwb(){
-        setText("bb");piece=10;
+//        setText("bb");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bwb,null));
+        piece=10;
     }
     public void setbbK(){
-        setText("bkk");
+//        setText("bkk");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bbkk,null));
         piece=7;
     }
     public void setbwK(){
-        setText("bkk");
+//        setText("bkk");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bwkk,null));
         piece=7;
     }
     public void setbbq(){
-        setText("bq");
+//        setText("bq");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bbq,null));
         piece=8;
     }
     public void setbwq(){
-        setText("bq");piece=8;
+//        setText("bq");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bwq,null));
+        piece=8;
     }
     public void setbbp(){
-        setText("bp");piece=12;
+//        setText("bp");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bbp,null));
+        piece=12;
     }
     public void setbwp(){
-        setText("bp");piece=12;
+//        setText("bp");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.bwp,null));
+        piece=12;
     }
     //white pieces
     public void setwbr(){
-        setText("wr");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wbr,null));
         piece=3;
     }
     public void setwwr(){
-        setText("wr");piece=3;
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wwr,null));piece=3;
     }
     public void setwbb(){
-        setText("wb");piece=4;
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wbb,null));piece=4;
     }
     public void setwbk(){
-        setText("wk");piece=5;
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wbk,null));piece=5;
     }
     public void setwwk(){
-        setText("wk");piece=5;
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wwk,null));piece=5;
     }
     public void setwwb(){
-        setText("wb");piece=4;
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wwb,null));piece=4;
     }
     public void setwbK(){
-        setText("wKk");
+       // setText("wKk");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wbkk,null));
         piece=1;
     }
     public void setwwK(){
-        setText("wKk");
+        //setText("wKk");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wwkk,null));
         piece=1;
     }
     public void setwbq(){
-        setText("wq");
+//        setText("wq");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wbq,null));
         piece=2;
     }
     public void setwwq(){
-        setText("wq");piece=2;
+        //setText("wq");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wwq,null));
+        piece=2;
     }
     public void setwbp(){
-        setText("wp");piece=6;
+       // setText("wp");
+        piece=6;
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wbp,null));
     }
     public void setwwp(){
-        setText("wp");piece=6;
+       // setText("wp");
+        setBackgroundDrawable(getResources().getDrawable(R.drawable.wwp,null));
+        piece=6;
     }
 
 
     public void showMovable(int a) {
+        if(piece==1)
+            Log.d("king","is movable");
         if(a==1){
             if(piece<7&&piece!=0)
                 return;
@@ -185,17 +219,23 @@ public class ChessButton extends AppCompatButton{
             else
                 setBackgroundDrawable(getResources().getDrawable(R.drawable.moves_available_black, null));
         }else{
-
+                if(piece==1||piece==7){
+                    Log.d("king","checkFlag enabled for"+ piece+ " "+ x+" "+y);
+                    checkFlag = true;
+                }
             //show attacking move
         }
     }
     public void unShow(){
         if(isShowing){
             isShowing=false;
-            if((x+y)%2!=0){
-                setBackgroundColor(getResources().getColor(R.color.black,null));
-            }else{
-                setBackgroundColor(getResources().getColor(R.color.white,null));
+            if(piece==0) {
+                if ((x + y) % 2 != 0) {
+                    setBackgroundDrawable(getResources().getDrawable(R.drawable.black_background, null));
+                   // setBackgroundColor(getResources().getColor(R.color.black, null));
+                } else {
+                    setBackgroundColor(getResources().getColor(R.color.white, null));
+                }
             }
         }
     }

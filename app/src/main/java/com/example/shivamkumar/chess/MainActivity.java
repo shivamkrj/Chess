@@ -2,28 +2,35 @@ package com.example.shivamkumar.chess;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     LinearLayout rootLayout;
+    TextView textView;
     LinearLayout rows[]= new LinearLayout[8];
     ChessButton[][] board;
     int previousPiece;
+    boolean checkFFlag;
+    boolean checkWhiteFlag;
+    boolean checkBlackFlag,gameOverFlag;
+    int wx,wy,bx,by;
     int turn;
-    int px,py;
+    int px,py,qx,qy;
+    public  boolean emposentWhiteFlag,emposentBlackFlag;
     public boolean turnMove;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        textView=findViewById(R.id.textView);
         setBoard();
     }
-
     private void setBoard() {
 
         rootLayout= (LinearLayout)findViewById(R.id.rootLayout);
@@ -31,8 +38,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         board= new ChessButton[8][8];
         turn =1;
         previousPiece=0;
+        gameOverFlag=false;
+        checkFFlag=false;
+        checkBlackFlag=false;
+        checkWhiteFlag=false;
         px=-1;py=-1;
         turnMove=false;
+        emposentBlackFlag=false;
+        emposentWhiteFlag=false;
 
         for(int i=0;i<8;i++){
             LinearLayout linearLayout= new LinearLayout(this);
@@ -49,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 chessButton.setCoordinate(i,j);
                 LinearLayout linearLayout = new LinearLayout(this);
                 LinearLayout.LayoutParams layoutParams= new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT,1);
-                layoutParams.setMargins(2,2,2,2);
+              //  layoutParams.setMargins(2,2,2,2);
                 linearLayout.setLayoutParams(layoutParams);
                 linearLayout.addView(chessButton);
                 rows[i].addView(linearLayout);
@@ -60,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setInitialPieces();
 
     }
-
     private void setInitialPieces() {
         board[0][0].setwwr();
         board[0][1].setwbk();
@@ -95,37 +107,318 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         board[6][5].setbbp();
         board[6][6].setbwp();
         board[6][7].setbbp();
+
+        wx=0;
+        wy=3;
+        bx=7;
+        by=3;
     }
 
     @Override
     public void onClick(View view) {
+        if(gameOverFlag){
+            Toast.makeText(this,"Game Over",Toast.LENGTH_SHORT).show();
+            return;
+        }
         ChessButton button=(ChessButton)view;
-
             if (button.isShowing) {
+                int pre=button.getPiece();
                 board[px][py].setPiece(0);
-                button.setPiece(previousPiece);
                 unShowMoves();
-                turnMove=false;
+                button.setPiece(previousPiece);
+                if(previousPiece==1){
+                    wx=button.x;wy=button.y;
+                }else if(previousPiece==7){
+                    bx=button.x;by=button.y;
+                }
+                if(checkFFlag){
+                    checkCheck(qx,qy);
+                    if(checkFFlag)
+                    {
+                        Toast.makeText(this,"Check",Toast.LENGTH_SHORT).show();
+                        board[px][py].setPiece(previousPiece);
+                        button.setPiece(pre);
+                        if(previousPiece==1){
+                            wx=px;wy=py;
+                        }else if(previousPiece==7){
+                            bx=px;by=py;
+                        }
+                        return;
+                    }
+                }
+                if(checkForCheck())
+                {
+                    Toast.makeText(this,"Check",Toast.LENGTH_SHORT).show();
+                    board[px][py].setPiece(previousPiece);
+                    button.setPiece(pre);
+                    if(previousPiece==1){
+                        wx=px;wy=py;
+                    }else if(previousPiece==7){
+                        bx=px;by=py;
+                    }
+                    return;
+                }
+                if(checkWhiteFlag){
+                    if(checkCheckMate(1)){
+                        Toast.makeText(this,"Check Mate",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this,"Player Black Wins",Toast.LENGTH_SHORT).show();
+                        gameOverFlag=true;
+
+                    }else {
+                        Toast.makeText(this, "check", Toast.LENGTH_SHORT).show();
+                        checkWhiteFlag=false;
+                    }
+                }else if(checkBlackFlag){
+                    if(checkCheckMate(2)){
+                        Toast.makeText(this,"Check Mate",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this,"Player White Wins",Toast.LENGTH_SHORT).show();
+                        gameOverFlag=true;
+                    }else {
+                        Toast.makeText(this, "check", Toast.LENGTH_SHORT).show();
+                        checkBlackFlag=false;
+                    }
+                }
+                px=button.x;
+                py=button.y;
+                checkCheck(px,py);
                 toggleTurn();
                 return;
             }
-
-        if((button.getPiece()>6&&turn==1)||button.getPiece()<7&&turn==2){
-            Toast.makeText(this,"Invalid Move",Toast.LENGTH_SHORT).show();
+        if((button.getPiece()>6&&turn==1)){
+            Toast.makeText(this,"White's Move",Toast.LENGTH_SHORT).show();
+            return;
+        }else if(button.getPiece()<7&&turn==2){
+            Toast.makeText(this,"Black's Move",Toast.LENGTH_SHORT).show();
             return;
         }
         unShowMoves();
         int piece=button.getPiece();
         showMoves(piece,button.x,button.y);
+        px=button.x;
+        py=button.y;
         previousPiece=piece;
-
-
     }
 
+    public int returnToggledMove(){
+        if(turn==1)
+            return 2;
+        else return 1;
+    }
+    private boolean checkCheckMate(int x) {
+       // int rTurn = returnToggledMove();
+     //   Log.d("checkmate",turn+ "inside checkmate function");
+        if(x==2){
+
+            for(int i=0;i<8;i++){
+                for(int j=0;j<8;j++){
+                    if(board[i][j].getPiece()>6){
+                        ChessButton button = board[i][j];
+                        int preP =button.getPiece();
+                        for(int a=0;a<8;a++){
+                            for(int b=0;b<8;b++){
+                                showMoves(preP,i,j);
+                                if(board[a][b].isShowing){
+                                    int pre = board[a][b].getPiece();
+                                    button.setPiece(0);
+                                    unShowMoves();
+                                    board[a][b].setPiece(preP);
+                                    if(preP==1){
+                                        wx=board[a][b].x;
+                                        wy=board[a][b].y;
+                                    }else if(preP==7){
+                                        bx=board[a][b].x;
+                                        by=board[a][b].y;
+                                    }
+
+                                    turn=returnToggledMove();
+                                    if(checkForCheckjust()){
+                                        button.setPiece(preP);
+                                        board[a][b].setPiece(pre);
+                                        if(preP==1){
+                                            wx=button.x;wy=button.y;
+                                        }else if(preP==7){
+                                            bx=button.x;by=button.y;
+                                        }
+                                        turn=returnToggledMove();
+                                        continue;
+                                    }else{
+                                        button.setPiece(preP);
+                                        board[a][b].setPiece(pre);
+                                        if(preP==1){
+                                            wx=button.x;wy=button.y;
+                                        }else if(previousPiece==7){
+                                            bx=button.x;by=button.y;
+                                        }
+                                        turn=returnToggledMove();
+                                        checkBlackFlag=false;
+                                        checkWhiteFlag=false;
+                                        return false;
+                                    }
+
+
+                                }else
+                                    unShowMoves();
+                            }
+
+                        }
+
+                    }
+                }
+            }
+        }else {
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    if (board[i][j].getPiece() <7&&board[i][j].getPiece()!=0) {
+                        ChessButton button = board[i][j];
+                        int preP = button.getPiece();
+                        showMoves(preP, i, j);
+                        Log.d("checkmate", preP + "");
+                        for (int a = 0; a < 8; a++) {
+                            for (int b = 0; b < 8; b++) {
+                                if (board[a][b].isShowing) {
+                                    int pre = board[a][b].getPiece();
+                                    button.setPiece(0);
+                                    unShowMoves();
+                                    board[a][b].setPiece(preP);
+                                    if(preP==1){
+                                        wx=board[a][b].x;
+                                        wy=board[a][b].y;
+                                    }else if(preP==7){
+                                        bx=board[a][b].x;
+                                        by=board[a][b].y;
+                                    }
+
+                                    turn = returnToggledMove();
+                                    if (checkForCheck()) {
+                                        button.setPiece(preP);
+                                        board[a][b].setPiece(pre);
+                                        if(preP==1){
+                                            wx=button.x;wy=button.y;
+                                        }else if(preP==7){
+                                            bx=button.x;by=button.y;
+                                        }
+                                        turn = returnToggledMove();
+                                        continue;
+                                    } else {
+                                        button.setPiece(preP);
+                                        board[a][b].setPiece(pre);
+                                        if(preP==1){
+                                            wx=button.x;wy=button.y;
+                                        }else if(previousPiece==7){
+                                            bx=button.x;by=button.y;
+                                        }
+                                        checkBlackFlag=false;
+                                        checkWhiteFlag=false;
+                                        turn = returnToggledMove();
+                                        return false;
+                                    }
+
+                                }
+                            }
+
+                        }
+
+                    }
+                }
+            }
+        }
+        checkBlackFlag=false;
+        checkWhiteFlag=false;
+        return true;
+    }
+
+    private void checkCheck(int x,int y) {
+        int piece=board[x][y].getPiece();
+        board[bx][by].checkFlag=false;
+        board[wx][wy].checkFlag=false;
+        showMoves(piece,x,y);
+        unShowMoves();
+        checkFFlag=false;
+
+         if(board[bx][by].checkFlag){
+                 //   Toast.makeText(this, "Check", Toast.LENGTH_SHORT).show();
+                    checkFFlag = true;
+                    board[bx][by].checkFlag=false;
+                    qx=x;
+                    qy=y;
+
+         }
+         else if(board[wx][wy].checkFlag){
+            // Toast.makeText(this, "Check", Toast.LENGTH_SHORT).show();
+             checkFFlag = true;
+             board[wx][wy].checkFlag=false;
+             qx=x;
+             qy=y;
+         }
+    }
+    private boolean checkForCheckjust(){
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+
+                if(turn==1) {
+                    if(board[i][j].getPiece()>6){
+                        checkCheck(i,j);
+                        if(checkFFlag){
+                            return true;
+                        }
+                    }
+
+                }else {
+                    if (board[i][j].getPiece() < 7 && board[i][j].getPiece() != 0) {
+                        checkCheck(i, j);
+                        if (checkFFlag) {
+                            return true;
+                        }
+                    }
+                }
+
+            }
+        }
+        return false;
+    }
+    private boolean checkForCheck() {
+       // int rTurn=returnToggledMove();
+
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+
+                if(turn==1) {
+                    if(board[i][j].getPiece()>6){
+                        checkCheck(i,j);
+                        if(checkFFlag){
+                            return true;
+                        }
+                    }else if(board[i][j].getPiece() < 7 && board[i][j].getPiece() != 0){
+                        checkCheck(i, j);
+                        if (checkFFlag){
+                            checkBlackFlag=true;
+                            checkFFlag=false;
+                            return false;
+                        }
+                    }
+
+                }else {
+                    if (board[i][j].getPiece() < 7 && board[i][j].getPiece() != 0) {
+                        checkCheck(i, j);
+                        if (checkFFlag) {
+                            return true;
+                        }
+                    } else if (board[i][j].getPiece() > 6) {
+                        checkCheck(i, j);
+                            if (checkFFlag){
+                                checkWhiteFlag=true;
+                                checkFFlag=false;
+                                return false;
+                        }
+                    }
+                }
+
+            }
+        }
+        return false;
+    }
     public void showMoves(int piece,int x,int y) {
         turnMove=true;
-        px=x;
-        py=y;
         if(piece==6){
             moveWhitePawn(x,y);
         }else if(piece==12){
@@ -681,6 +974,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (board[x - 1][y - 1].getPiece() <7&&board[x - 1][y - 1].getPiece()!=0)
                 board[x - 1][y - 1].showMovable(2);
         }
+        if(emposentWhiteFlag){
+            if(board[x][y].x==3&&(py==y-1||py==y+1)){
+                board[x-1][py].showMovable(2);
+            }
+        }
     }
     private void moveWhitePawn(int x, int y) {
 
@@ -691,7 +989,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(x==1){
             if(checkPosition(x+2,y)){
                 if(board[x+2][y].getPiece()==0)
+                {
                     board[x+2][y].showMovable(1);
+                    emposentWhiteFlag=true;
+                }
             }
         }
         if(checkPosition(x+1,y+1)){
@@ -704,6 +1005,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         //Implementing Imposent moves
 
+
     }
 
     private boolean checkPosition(int i, int j) {
@@ -714,12 +1016,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     public void toggleTurn(){
         if(turn==1)
+        {
             turn=2;
+            textView.setText("Player 2 (Black) Turn");
+        }
         else
+        {
+            textView.setText("Player 1 (White) Turn");
             turn=1;
-    }
-
-    public static void toggleTurnMove() {
-
+        }
     }
 }
