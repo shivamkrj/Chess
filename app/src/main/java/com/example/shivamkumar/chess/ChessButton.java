@@ -19,9 +19,11 @@ public class ChessButton extends AppCompatButton{
         if(piece==0) {
             setText(" ");
             if((x+y)%2!=0){
-                setBackgroundColor(getResources().getColor(R.color.black,null));
+                //setBackgroundColor(getResources().getColor(R.color.black,null));
+                setBackgroundDrawable(getResources().getDrawable(R.drawable.blck_bgr, null));
             }else{
-                setBackgroundColor(getResources().getColor(R.color.white,null));
+                //setBackgroundColor(getResources().getColor(R.color.white,null));
+                setBackgroundDrawable(getResources().getDrawable(R.drawable.white_bgr, null));
             }
         }else if((x+y)%2==0) {
             if (piece == 6) {
@@ -84,11 +86,12 @@ public class ChessButton extends AppCompatButton{
     public void setCoordinate(int i, int j) {
         x=i;y=j;
         if((i+j)%2!=0){
-            setBackgroundColor(getResources().getColor(R.color.black,null));
+            setBackgroundDrawable(getResources().getDrawable(R.drawable.blck_bgr, null));
         }else{
-            setBackgroundColor(getResources().getColor(R.color.white,null));
+            setBackgroundDrawable(getResources().getDrawable(R.drawable.white_bgr, null));
         }
     }
+
     //black pieces
     public void setbbr(){
        // setText("br");
@@ -231,10 +234,10 @@ public class ChessButton extends AppCompatButton{
             isShowing=false;
             if(piece==0) {
                 if ((x + y) % 2 != 0) {
-                    setBackgroundDrawable(getResources().getDrawable(R.drawable.black_background, null));
+                    setBackgroundDrawable(getResources().getDrawable(R.drawable.blck_bgr, null));
                    // setBackgroundColor(getResources().getColor(R.color.black, null));
                 } else {
-                    setBackgroundColor(getResources().getColor(R.color.white, null));
+                    setBackgroundDrawable(getResources().getDrawable(R.drawable.white_bgr, null));
                 }
             }
         }

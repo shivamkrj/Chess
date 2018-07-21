@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     LinearLayout rootLayout;
     TextView textView;
-    LinearLayout rows[]= new LinearLayout[8];
+    LinearLayout rows[];
     ChessButton[][] board;
     int previousPiece;
     boolean checkFFlag;
@@ -33,7 +33,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     private void setBoard() {
 
-        rootLayout= (LinearLayout)findViewById(R.id.rootLayout);
+        rows= new LinearLayout[8];
+        rootLayout=findViewById(R.id.rootLayout);
         rootLayout.removeAllViews();
         board= new ChessButton[8][8];
         turn =1;
@@ -1003,8 +1004,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (board[x + 1][y - 1].getPiece() > 6)
                 board[x + 1][y - 1].showMovable(1);
         }
-        //Implementing Imposent moves
-
 
     }
 
